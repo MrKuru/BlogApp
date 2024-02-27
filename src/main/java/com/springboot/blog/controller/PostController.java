@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/post-controller")
 public class PostController {
 
     private PostService postService;
@@ -17,13 +17,19 @@ public class PostController {
     public PostController(PostService postService) {
         this.postService = postService;
     }
-    @PostMapping
+
+    @PostMapping("create")
     public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto){
         return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("posts")
     public ResponseEntity<List<PostDto>> getAllPosts(){
         return new ResponseEntity<>(postService.getAllPosts(), HttpStatus.OK);
+    }
+
+    @GetMapping("post/{id}")
+    public ResponseEntity<PostDto> getPost(@PathVariable(name = "id") long id){
+        return new ResponseEntity<>(postService.getPost(id), HttpStatus.OK);
     }
 }
