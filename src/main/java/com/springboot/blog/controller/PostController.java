@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/post-controller")
+@RequestMapping("/api/posts")
 public class PostController {
 
     private PostService postService;
@@ -18,18 +18,29 @@ public class PostController {
         this.postService = postService;
     }
 
-    @PostMapping("create")
+    @PostMapping
     public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto){
         return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("posts")
+    @GetMapping
     public ResponseEntity<List<PostDto>> getAllPosts(){
         return new ResponseEntity<>(postService.getAllPosts(), HttpStatus.OK);
     }
 
-    @GetMapping("post/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<PostDto> getPost(@PathVariable(name = "id") long id){
         return new ResponseEntity<>(postService.getPost(id), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PostDto> updatePost(@RequestBody PostDto postDto, @PathVariable(name = "id") long id){
+        return new ResponseEntity<>(postService.updatePost(postDto, id), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deletePost(@PathVariable(name = "id") long id){
+        postService.deletePostById(id);
+        return new ResponseEntity<>("Post entity deleted successfully.", HttpStatus.OK);
     }
 }
