@@ -1,6 +1,7 @@
 package com.springboot.blog.service.impl;
 
 import com.springboot.blog.dto.PostDto;
+import com.springboot.blog.dto.PostResponse;
 import com.springboot.blog.exception.ResourceNotFoundException;
 import com.springboot.blog.model.Post;
 import com.springboot.blog.repository.PostRepository;
@@ -8,6 +9,7 @@ import com.springboot.blog.service.PostService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,13 +33,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDto> getAllPosts(int pageNum ,int pageSize) {
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
+    public PostResponse getAllPosts(int pageNum ,int pageSize, String sortBy, String sortDirection) {
+        Sort sort = checkSortDirection(sortBy, sortDirection);
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
         Page<Post> pageList = postRepository.findAll(pageable);
         List<Post> postList = pageList.getContent();
-        return postList.stream()
+        List<PostDto> postDtoList = postList.stream()
                 .map(PostServiceImpl::mapToDto)
                 .collect(Collectors.toList());
+        return getPostResponse(pageList, postDtoList);
     }
 
     @Override
@@ -78,5 +82,21 @@ public class PostServiceImpl implements PostService {
         post.setDescription(postDto.getDescription());
         post.setContent(postDto.getContent());
         return post;
+    }
+    private static PostResponse getPostResponse(Page<Post> pageList, List<PostDto> postDtoList) {
+        PostResponse postResponse = new PostResponse();
+        postResponse.setContent(postDtoList);
+        postResponse.setPageNo(pageList.getNumber());
+        postResponse.setPageSize(pageList.getSize());
+        postResponse.setTotalElements(pageList.getTotalElements());
+        postResponse.setTotalPages(pageList.getTotalPages());
+        postResponse.setLast(pageList.isLast());
+        return postResponse;
+    }
+
+    private static Sort checkSortDirection(String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        return sort;
     }
 }
