@@ -8,6 +8,7 @@ import com.springboot.blog.model.Post;
 import com.springboot.blog.repository.CommentRepository;
 import com.springboot.blog.repository.PostRepository;
 import com.springboot.blog.service.CommentService;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +19,19 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements CommentService {
     private CommentRepository commentRepository;
     private PostRepository postRepository;
+    private ModelMapper modelMapper;
 
-    public CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository, ModelMapper modelMapper) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
     public CommentDto createComment(long postId, CommentDto commentDto) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-        Comment comment = mapToEntity(commentDto, post);
+        Comment comment = mapToEntity(commentDto);
+        comment.setPost(post);
         Comment savedComment = commentRepository.save(comment);
         return mapToDto(savedComment);
     }
@@ -36,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getCommentsByPostId(long postId) {
         List<Comment> comments = commentRepository.findByPostId(postId);
         return comments.stream()
-                .map(CommentServiceImpl::mapToDto)
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
@@ -74,21 +78,13 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment);
     }
 
-    private static CommentDto mapToDto(Comment savedComment) {
-        CommentDto dto = new CommentDto();
-        dto.setId(savedComment.getId());
-        dto.setEmail(savedComment.getEmail());
-        dto.setName(savedComment.getName());
-        dto.setBody(savedComment.getBody());
+    private CommentDto mapToDto(Comment savedComment) {
+        CommentDto dto = modelMapper.map(savedComment, CommentDto.class);
         return dto;
     }
 
-    private static Comment mapToEntity(CommentDto commentDto, Post post) {
-        Comment comment = new Comment();
-        comment.setName(commentDto.getName());
-        comment.setBody(commentDto.getBody());
-        comment.setPost(post);
-        comment.setEmail(commentDto.getEmail());
+    private Comment mapToEntity(CommentDto commentDto) {
+        Comment comment = modelMapper.map(commentDto, Comment.class);
         return comment;
     }
 }
