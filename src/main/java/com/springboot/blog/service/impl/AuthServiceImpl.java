@@ -1,6 +1,6 @@
 package com.springboot.blog.service.impl;
 
-import com.springboot.blog.model.LoginDto;
+import com.springboot.blog.dto.LoginDto;
 import com.springboot.blog.service.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

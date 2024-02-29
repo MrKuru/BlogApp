@@ -1,6 +1,6 @@
 package com.springboot.blog.controller;
 
-import com.springboot.blog.model.LoginDto;
+import com.springboot.blog.dto.LoginDto;
 import com.springboot.blog.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
