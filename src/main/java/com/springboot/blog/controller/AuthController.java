@@ -4,6 +4,8 @@ import com.springboot.blog.dto.JwtAuthResponse;
 import com.springboot.blog.dto.LoginDto;
 import com.springboot.blog.dto.RegisterDto;
 import com.springboot.blog.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(
+        name = "REST APIs for Auth"
+)
 public class AuthController {
 
     public AuthController(AuthService authService) {
@@ -22,6 +27,7 @@ public class AuthController {
     private AuthService authService;
 
 
+    @Operation(summary = "Login")
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto){
         String token = authService.login(loginDto);
@@ -30,6 +36,7 @@ public class AuthController {
         return ResponseEntity.ok(jwtAuthResponse);
     }
 
+    @Operation(summary = "Register")
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
         String response = authService.register(registerDto);
